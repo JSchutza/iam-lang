@@ -1,7 +1,53 @@
 #!/bin/bash
 
+# Make script more flexible by allowing command line arguments
+SKIP_DEPS=false
+CLEAN_BUILD=true
+VERBOSE=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip-deps)
+      SKIP_DEPS=true
+      shift
+      ;;
+    --no-clean)
+      CLEAN_BUILD=false
+      shift
+      ;;
+    --verbose)
+      VERBOSE=true
+      shift
+      ;;
+    --help)
+      echo "Usage: ./install_and_build.sh [options]"
+      echo "Options:"
+      echo "  --skip-deps    Skip dependency installation"
+      echo "  --no-clean     Don't remove existing build before rebuilding"
+      echo "  --verbose      Show more detailed output"
+      echo "  --help         Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
 echo "IAM Language Complete Installer and Builder (C++ Version)"
 echo "========================================================"
+
+if [ "$SKIP_DEPS" = true ]; then
+    echo "Skipping dependency installation (--skip-deps flag set)"
+fi
+
+if [ "$CLEAN_BUILD" = true ]; then
+    echo "Will clean any existing builds before rebuilding"
+else
+    echo "Will not clean existing builds (--no-clean flag set)"
+fi
 
 # Create directories if they don't exist
 mkdir -p ~/bin
@@ -18,6 +64,15 @@ fi
 
 # Function to install Scoop (Windows package manager)
 install_scoop() {
+    if [ "$SKIP_DEPS" = true ]; then
+        if command -v scoop &> /dev/null; then
+            echo "Using existing Scoop installation"
+            return 0
+        else
+            echo "Warning: --skip-deps set but Scoop is not installed"
+        fi
+    fi
+    
     echo "Checking for Scoop..."
     
     # Check if Scoop is installed
@@ -51,6 +106,15 @@ install_scoop() {
 
 # Function to install Make
 install_make() {
+    if [ "$SKIP_DEPS" = true ]; then
+        if command -v make &> /dev/null; then
+            echo "Using existing Make installation"
+            return 0
+        else
+            echo "Warning: --skip-deps set but Make is not installed"
+        fi
+    fi
+    
     echo "Checking for Make..."
     
     # Check if Make is already installed
@@ -80,6 +144,16 @@ install_make() {
 
 # Function to install C++ compiler
 install_cpp_compiler() {
+    if [ "$SKIP_DEPS" = true ]; then
+        if command -v g++ &> /dev/null || command -v cl &> /dev/null || 
+           [ -f "$HOME/scoop/apps/gcc/current/bin/g++.exe" ] || [ -f ~/bin/g++.exe ]; then
+            echo "Using existing C++ compiler"
+            return 0
+        else
+            echo "Warning: --skip-deps set but no C++ compiler found"
+        fi
+    fi
+    
     echo "Checking for C++ compiler..."
     
     # Check if g++ is already installed and in PATH
@@ -150,7 +224,37 @@ check_source_files() {
         echo "ERROR: iam_lang.cpp source file not found!"
         return 1
     fi
+    
+    if [ "$VERBOSE" = true ]; then
+        echo "Found source file: iam_lang.cpp"
+    fi
+    
     return 0
+}
+
+# Function to clean up old build artifacts
+clean_build() {
+    if [ "$CLEAN_BUILD" = true ]; then
+        echo "Cleaning up old build artifacts..."
+        
+        # Remove executable files
+        if [ -f "iam_lang" ]; then
+            echo "Removing old iam_lang executable"
+            rm -f "iam_lang"
+        fi
+        
+        if [ -f "iam_lang.exe" ]; then
+            echo "Removing old iam_lang.exe executable"
+            rm -f "iam_lang.exe"
+        fi
+        
+        # Remove any object files
+        rm -f *.o
+        
+        echo "Clean-up completed."
+    else
+        echo "Skipping clean-up (--no-clean flag set)"
+    fi
 }
 
 # Function to ensure examples file exists
@@ -179,6 +283,8 @@ print "You entered:"
 print userValue
 EOF
         echo "Created examples.iam file."
+    elif [ "$VERBOSE" = true ]; then
+        echo "Found existing examples.iam file"
     fi
 }
 
@@ -209,7 +315,11 @@ EOF
         echo "Created Makefile."
         return 0
     else
-        echo "Makefile already exists."
+        if [ "$VERBOSE" = true ]; then
+            echo "Found existing Makefile"
+        else
+            echo "Makefile already exists."
+        fi
         return 0
     fi
 }
@@ -282,6 +392,11 @@ build_directly() {
 
 # Function to install all dependencies
 install_dependencies() {
+    if [ "$SKIP_DEPS" = true ]; then
+        echo "Skipping dependency installation as requested"
+        return 0
+    fi
+    
     local all_success=true
     
     # Install Scoop (for Windows package management)
@@ -309,7 +424,7 @@ install_dependencies() {
 # Main script execution
 echo "Step 1: Installing dependencies..."
 install_dependencies
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 ] && [ "$SKIP_DEPS" = false ]; then
     echo "WARNING: Some dependencies may not have installed correctly."
     echo "We'll attempt to build anyway, but it may fail."
 fi
@@ -341,6 +456,9 @@ if ! check_source_files; then
     echo "ERROR: Required source files are missing."
     exit 1
 fi
+
+# Clean up old builds
+clean_build
 
 # Ensure examples file exists
 ensure_examples

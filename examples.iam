@@ -1,7 +1,4 @@
 # IAM Language Examples
-# To run: cat examples.iam | ./iam_lang
-
-# This is a sample IAM language program
 
 # Print a welcome message
 print "Welcome to IAM Language!"
@@ -20,28 +17,3 @@ input userValue
 # Show the entered value
 print "You entered:"
 print userValue
-
-# Basic variable assignment
-LET a = 5
-LET b = 10
-PRINT a
-PRINT b
-
-# String output
-PRINT "Hello from IAM Language!"
-
-# Simple counting program
-LET i = 1
-PRINT "Counting to 5:"
-PRINT i
-LET i = 2
-PRINT i
-LET i = 3
-PRINT i
-LET i = 4
-PRINT i
-LET i = 5
-PRINT i
-
-# Exit the interpreter
-EXIT 
