@@ -1,0 +1,98 @@
+# IAM Language Advanced Examples
+# Demonstrating arrays and loops
+
+# Welcome message
+print "IAM Language - Advanced Features Demo"
+print "---------------------------------"
+
+# 1. Array Creation and Basic Operations
+print "1. Arrays"
+print "---------"
+
+# Create an array of size 5 with default values (0)
+array numbers 5
+print "Created array with 5 elements:"
+print numbers
+
+# Set values in the array
+print "Setting array values..."
+set numbers[0] 10
+set numbers[1] 20
+set numbers[2] 30
+set numbers[3] 40
+set numbers[4] 50
+
+# Print the array
+print "Updated array:"
+print numbers
+
+# Print individual elements
+print "Individual elements:"
+print numbers[0]
+print numbers[2]
+print numbers[4]
+
+# 2. For Loops
+print ""
+print "2. For Loops"
+print "-----------"
+
+# Loop through numbers from 1 to 5
+print "Counting from 1 to 5:"
+for i 1 6
+  print i
+end
+
+# Use a loop variable as an array index
+print "Accessing array elements in a loop:"
+for index 0 5
+  print "Element at index"
+  print index
+  print "is:"
+  print numbers[index]
+end
+
+# 3. Calculate Sum of Array
+print ""
+print "3. Sum of Array"
+print "-------------"
+
+# Calculate sum using a loop
+set sum 0
+for i 0 5
+  # Add array element to sum
+  set temp numbers[i]
+  set sum sum + temp
+end
+
+print "Sum of all elements:"
+print sum
+print "Average value:"
+set average sum / 5
+print average
+
+# 4. Combination Example: Array of Squares
+print ""
+print "4. Array of Squares"
+print "----------------"
+
+# Create a new array for squares
+array squares 10
+
+# Fill the array with square values
+print "Generating squares from 1 to 10:"
+for i 1 11
+  # Calculate square: i*i
+  set val i * i
+  
+  # Store in array at index i-1
+  set index i - 1
+  set squares[index] val
+end
+
+# Print the array of squares
+print "Array of squares:"
+print squares
+
+print ""
+print "End of advanced examples" 
